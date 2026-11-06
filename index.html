@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>JTS Administration – Time &amp; Charges</title>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#f2f6f7;--card:#fff;--ink:#16292f;--mute:#5b7078;--line:#d9e3e6;--accent:#0f6f78;--accent-ink:#fff;--soft:#e2f1f2;--danger:#b3372f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0f1b1f;--card:#17272c;--ink:#e6f0f2;--mute:#97aeb5;--line:#2a3f45;--accent:#4cc3cc;--accent-ink:#0b1a1d;--soft:#1d3a40;--danger:#ff8f85;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0f1b1f;--card:#17272c;--ink:#e6f0f2;--mute:#97aeb5;--line:#2a3f45;--accent:#4cc3cc;--accent-ink:#0b1a1d;--soft:#1d3a40;--danger:#ff8f85;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 Figtree,system-ui,-apple-system,"Segoe UI",sans-serif}
+.wrap{max-width:980px;margin:0 auto;padding:20px 16px 48px}
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:12px;flex-wrap:wrap;margin-bottom:18px}
+h1{font-size:1.7rem;margin:0;letter-spacing:-.02em}
+.sub{color:var(--mute);margin:2px 0 0;max-width:520px}
+.total{background:var(--accent);color:var(--accent-ink);border-radius:14px;padding:10px 18px;text-align:right}
+.total b{display:block;font-size:1.5rem;line-height:1.2}.total span{font-size:.85rem;opacity:.9}
+section{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:18px;margin-bottom:18px}
+h2{font-size:1.1rem;margin:0 0 12px}
+p.note{color:var(--mute);margin:0 0 12px;font-size:.93rem}
+form{display:grid;grid-template-columns:repeat(6,1fr);gap:12px}
+.f{display:flex;flex-direction:column;gap:4px;grid-column:span 2}
+.f.wide{grid-column:span 4}.f.full{grid-column:1/-1}
+label{font-size:.88rem;font-weight:600}
+input,select{font:inherit;color:var(--ink);background:var(--bg);border:1px solid var(--line);border-radius:9px;padding:10px 12px;width:100%}
+input:focus,select:focus,button:focus-visible{outline:3px solid var(--accent);outline-offset:1px}
+.time{display:flex;gap:8px;align-items:center}.time span{color:var(--mute);font-size:.9rem}
+button{font:inherit;font-weight:600;border:0;border-radius:9px;padding:11px 18px;cursor:pointer;background:var(--accent);color:var(--accent-ink)}
+.preview{align-self:end;font-weight:600;padding:10px 0}
+.err{color:var(--danger);font-weight:600;min-height:1.4em;grid-column:1/-1;margin:0}.err.ok{color:var(--accent)}
+.tabs{display:flex;gap:8px;margin-bottom:18px;flex-wrap:wrap}
+.tab{background:var(--card);color:var(--mute);border:1px solid var(--line)}
+.tab.on{background:var(--accent);color:var(--accent-ink);border-color:var(--accent)}
+.clients{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
+.cc{background:var(--soft);border-radius:12px;padding:14px}
+.cc h3{margin:0 0 6px;font-size:1rem}
+.cc .row{display:flex;justify-content:space-between;color:var(--mute);font-size:.92rem}.cc .row b{color:var(--ink)}
+.cc .amt{font-size:1.35rem;font-weight:700;margin-top:6px}
+.scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;min-width:620px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line);font-size:.93rem;vertical-align:middle}
+th{color:var(--mute);font-weight:600}
+td.n,th.n{text-align:right;white-space:nowrap}
+.del{background:none;color:var(--danger);padding:4px 8px;font-weight:500}
+.del.sure{background:var(--danger);color:var(--card)}
+.empty{color:var(--mute)}
+.help summary{cursor:pointer;font-weight:600}
+.help ol{margin:10px 0 0;padding-left:20px;color:var(--mute)}
+.ghost{background:none;color:var(--mute);border:1px solid var(--line);font-weight:500;padding:8px 14px}
+.ghost.sure{background:var(--danger);color:var(--card);border-color:var(--danger)}
+.mbig{background:var(--soft);border-radius:12px;padding:14px 16px;margin:14px 0}
+.mbig b{display:block;font-size:1.9rem;line-height:1.2}.mbig span{color:var(--mute);font-size:.95rem}
+.mc{border:1px solid var(--line);border-radius:12px;padding:12px 14px;margin-bottom:12px}
+.mc.done{border-color:var(--accent)}
+.mc .hd{display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:6px}
+.mc h3{margin:0;font-size:1rem}.mc table{min-width:480px}
+.view{background:none;color:var(--accent);padding:4px 8px;font-weight:600}
+.badge{font-size:.75rem;font-weight:600;background:var(--soft);color:var(--accent);border-radius:99px;padding:2px 9px;margin-left:6px;vertical-align:middle;white-space:nowrap}
+.inv{margin:2px 0 8px}
+.mark{background:var(--soft);color:var(--accent);padding:7px 12px;font-size:.9rem}
+.mc.done .mark{background:none;color:var(--mute);border:1px solid var(--line);font-weight:500}
+.rin{width:96px;text-align:right;padding:7px 9px}
+.btns{display:flex;gap:10px;flex-wrap:wrap}
+.foot{color:var(--mute);font-size:.85rem;text-align:center}
+@media(max-width:640px){.f,.f.wide{grid-column:1/-1}.total{text-align:left;width:100%}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <div><h1>JTS Administration</h1><p class="sub" id="topNote"></p></div>
+ <div class="total"><b id="gTotal">£0.00</b><span id="gHours">0h 0m in total</span></div>
+</header>
+
+<section class="help"><details><summary>How to use this app</summary>
+<ol>
+<li><b>Log work:</b> type a client name (pick an existing one and their rate fills in), then the date, a short description and the time in hours and minutes. Press <b>Add entry</b> and the charge is worked out for you.</li>
+<li><b>Monthly:</b> choose a month to see what you earned and what is still to invoice. After sending a client’s invoice, press <b>Mark as invoiced</b> in their box.</li>
+<li><b>Clients:</b> add your real clients with their hourly rate, change a rate, or delete a client. Sample data is marked <b>Sample</b>. Delete it when you’re ready, or restore it any time to practise.</li>
+<li><b>Saving:</b> everything is saved automatically in this browser on this device. If you delete something, it is gone.</li>
+</ol></details></section>
+
+<div class="tabs" role="group" aria-label="Sections">
+ <button type="button" class="tab on" id="tb-log" data-act="tab:log">Log work</button>
+ <button type="button" class="tab" id="tb-month" data-act="tab:month">Monthly</button>
+ <button type="button" class="tab" id="tb-clients" data-act="tab:clients">Clients</button>
+</div>
+
+<div id="tab-log">
+<section>
+<h2>Add work</h2>
+<form id="form" autocomplete="off">
+ <div class="f wide"><label for="client">Client name</label><input id="client" list="clientList" required placeholder="e.g. Harbour &amp; Co"><datalist id="clientList"></datalist></div>
+ <div class="f"><label for="date">Date</label><input id="date" type="date" required></div>
+ <div class="f full"><label for="desc">Work completed</label><input id="desc" required maxlength="140" placeholder="e.g. Prepared board meeting papers"></div>
+ <div class="f"><label>Time spent</label><div class="time"><input id="hrs" type="number" min="0" max="99" step="1" value="0" aria-label="Hours"><span>h</span><input id="mins" type="number" min="0" max="59" step="1" value="0" aria-label="Minutes"><span>m</span></div></div>
+ <div class="f"><label for="rate">Hourly rate (£)</label><input id="rate" type="number" min="0" step="0.01" required placeholder="35.00"></div>
+ <div class="f"><label>Amount to charge</label><div class="preview" id="preview">£0.00</div></div>
+ <p class="err" id="err" role="alert"></p>
+ <div class="f full"><div><button type="submit">Add entry</button></div></div>
+</form>
+</section>
+<section><h2>Running totals by client</h2><div class="clients" id="clients"></div></section>
+<section>
+<h2>All entries</h2>
+<div class="scroll"><table>
+<thead><tr><th>Date</th><th>Client</th><th>Work completed</th><th class="n">Time</th><th class="n">Rate</th><th class="n">Charge</th><th></th></tr></thead>
+<tbody id="rows"></tbody></table></div>
+</section>
+</div>
+
+<div id="tab-month" hidden>
+<section>
+<h2>Month to invoice</h2>
+<div class="f" style="max-width:280px"><label for="monthSel">Choose month</label><select id="monthSel"></select></div>
+<div class="mbig"><b id="mAmt">£0.00</b><span id="mLbl"></span></div>
+<div id="mClients"></div>
+</section>
+<section>
+<h2>Earnings month by month</h2>
+<div class="scroll"><table>
+<thead><tr><th>Month</th><th class="n">Entries</th><th class="n">Time</th><th class="n">Earned</th><th>Status</th><th></th></tr></thead>
+<tbody id="mAll"></tbody></table></div>
+</section>
+</div>
+
+<div id="tab-clients" hidden>
+<section>
+<h2>Add a client</h2>
+<form id="cform" autocomplete="off">
+ <div class="f wide"><label for="cname">Client name</label><input id="cname" required maxlength="60" placeholder="e.g. Willow Lane Surgery"></div>
+ <div class="f"><label for="crate">Hourly rate (£)</label><input id="crate" type="number" min="0" step="0.01" required placeholder="35.00"></div>
+ <p class="err" id="cerr" role="alert"></p>
+ <div class="f full"><div><button type="submit">Add client</button></div></div>
+</form>
+</section>
+<section>
+<h2>Your clients</h2>
+<p class="note">Changing a rate here only affects new entries. Work you have already logged keeps the rate it was entered with. Deleting a client also deletes all of their entries.</p>
+<div class="scroll"><table>
+<thead><tr><th>Client</th><th class="n">Hourly rate (£)</th><th class="n">Entries</th><th class="n">Time</th><th class="n">Earned</th><th></th></tr></thead>
+<tbody id="cBody"></tbody></table></div>
+</section>
+<section>
+<h2>Sample data</h2>
+<p class="note" id="sampleNote"></p>
+<div class="btns" id="sampleBtns"></div>
+</section>
+</div>
+
+<p class="foot" id="saveNote"></p>
+</div>
+
+<script>
+var KEY="jts-tracker-v1",S,pending=null,curMonth=null,canSave=true;
+function $(i){return document.getElementById(i)}
+function money(n){return "£"+n.toLocaleString("en-GB",{minimumFractionDigits:2,maximumFractionDigits:2})}
+function hm(m){return Math.floor(m/60)+"h "+(m%60)+"m"}
+function charge(m,r){return Math.round(m/60*r*100)/100}
+function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
+function fdate(s){var p=s.split("-");return p[2]+"/"+p[1]+"/"+p[0]}
+function mname(k){var p=k.split("-");return new Date(+p[0],+p[1]-1,1).toLocaleDateString("en-GB",{month:"long",year:"numeric"})}
+function tot(l){var m=0,a=0;l.forEach(function(e){m+=e.m;a+=charge(e.m,e.r)});return{m:m,a:a}}
+function names(){return Object.keys(S.clients).sort()}
+function find(n){var l=n.trim().toLowerCase();for(var k in S.clients){if(k.toLowerCase()===l)return k}return null}
+function badge(s){return s?' <span class="badge">Sample</span>':''}
+
+function addSample(){
+ var raw=[
+ ["Harbour & Co","2026-10-12","Quarterly filing preparation",120,35],
+ ["Oakfield Events","2026-10-20","Event budget tracker",210,42],
+ ["Linden Parish Council","2026-10-27","Agenda and meeting papers",90,30],
+ ["Harbour & Co","2026-11-02","Diary and inbox management",90,35],
+ ["Harbour & Co","2026-11-03","Prepared monthly operations report",135,35],
+ ["Oakfield Events","2026-11-03","Venue and supplier bookings",180,42],
+ ["Oakfield Events","2026-11-04","Delegate list and event schedule",75,42],
+ ["Linden Parish Council","2026-11-04","Minutes for governance meeting",150,30],
+ ["Linden Parish Council","2026-11-05","Updated policy register",45,30],
+ ["Harbour & Co","2026-11-05","Project plan for office move",120,35]];
+ raw.forEach(function(e){
+  if(!S.clients[e[0]])S.clients[e[0]]={rate:e[4],s:true};
+  S.entries.push({id:S.nextId++,c:e[0],d:e[1],w:e[2],m:e[3],r:e[4],s:true});
+ });
+ S.invoiced["2026-10|Harbour & Co"]=true;S.invoiced["2026-10|Oakfield Events"]=true;
+}
+function delSample(){
+ S.entries=S.entries.filter(function(e){return !e.s});
+ Object.keys(S.clients).forEach(function(n){
+  if(S.clients[n].s){
+   if(S.entries.some(function(e){return e.c===n}))S.clients[n].s=false;else delete S.clients[n];
+  }
+ });
+}
+function load(){
+ var ok=false;
+ try{var t=localStorage.getItem(KEY);if(t){var o=JSON.parse(t);if(o&&o.entries&&o.clients&&o.invoiced){S=o;if(!S.nextId)S.nextId=1;ok=true}}}catch(x){}
+ if(!ok){S={entries:[],clients:{},invoiced:{},nextId:1};addSample()}
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));canSave=true}catch(x){canSave=false}}
+function commit(){
+ Object.keys(S.invoiced).forEach(function(k){
+  var m=k.slice(0,7),c=k.slice(8);
+  if(!S.entries.some(function(e){return e.c===c&&e.d.slice(0,7)===m}))delete S.invoiced[k];
+ });
+ save();render();
+}
+
+function renderLog(){
+ var ns=names(),g=tot(S.entries);
+ $("gTotal").textContent=money(g.a);
+ $("gHours").textContent=hm(g.m)+" in total";
+ $("clients").innerHTML=ns.length?ns.map(function(n){
+  var t=tot(S.entries.filter(function(e){return e.c===n}));
+  var cnt=S.entries.filter(function(e){return e.c===n}).length;
+  return '<div class="cc"><h3>'+esc(n)+badge(S.clients[n].s)+'</h3><div class="row"><span>Time</span><b>'+hm(t.m)+'</b></div><div class="row"><span>Entries</span><b>'+cnt+'</b></div><div class="amt">'+money(t.a)+'</div></div>';
+ }).join(""):'<p class="empty">No clients yet. Add one on the Clients tab, or log work for a new name.</p>';
+ $("clientList").innerHTML=ns.map(function(n){return '<option value="'+esc(n)+'">'}).join("");
+ var sorted=S.entries.slice().sort(function(a,b){return a.d<b.d?1:a.d>b.d?-1:b.id-a.id});
+ $("rows").innerHTML=sorted.length?sorted.map(function(e){
+  return '<tr><td>'+fdate(e.d)+'</td><td>'+esc(e.c)+badge(e.s)+'</td><td>'+esc(e.w)+'</td><td class="n">'+hm(e.m)+'</td><td class="n">'+money(e.r)+'/h</td><td class="n"><b>'+money(charge(e.m,e.r))+'</b></td><td class="n"><button class="del" type="button" data-act="del:'+e.id+'">Delete</button></td></tr>';
+ }).join(""):'<tr><td colspan="7" class="empty">No entries yet. Add your first piece of work above.</td></tr>';
+}
+
+function renderMonth(){
+ var keys=[],by={},sel=$("monthSel");
+ S.entries.forEach(function(e){var k=e.d.slice(0,7);if(!by[k]){by[k]=[];keys.push(k)}by[k].push(e)});
+ keys.sort().reverse();
+ if(!keys.length){curMonth=null;sel.innerHTML="";$("mAmt").textContent=money(0);$("mLbl").textContent="No work recorded yet.";$("mClients").innerHTML="";$("mAll").innerHTML='<tr><td colspan="6" class="empty">No entries yet.</td></tr>';return}
+ if(!curMonth||!by[curMonth]){var now=new Date().toISOString().slice(0,7);curMonth=by[now]?now:keys[0]}
+ sel.innerHTML=keys.map(function(k){return '<option value="'+k+'"'+(k===curMonth?' selected':'')+'>'+mname(k)+'</option>'}).join("");
+ var cl={},ns=[],all=tot(by[curMonth]),out=0,done=0;
+ by[curMonth].forEach(function(e){if(!cl[e.c]){cl[e.c]=[];ns.push(e.c)}cl[e.c].push(e)});
+ ns.sort();
+ ns.forEach(function(n){var t=tot(cl[n]).a;if(S.invoiced[curMonth+"|"+n])done+=t;else out+=t});
+ $("mAmt").textContent=money(out);
+ $("mLbl").textContent="still to invoice for "+mname(curMonth)+" · "+money(done)+" invoiced of "+money(all.a)+" earned · "+hm(all.m)+" across "+ns.length+(ns.length===1?" client":" clients");
+ $("mClients").innerHTML=ns.map(function(n){
+  var es=cl[n].slice().sort(function(a,b){return a.d<b.d?-1:a.d>b.d?1:a.id-b.id}),t=tot(es),inv=!!S.invoiced[curMonth+"|"+n];
+  return '<div class="mc'+(inv?' done':'')+'"><div class="hd"><h3>'+esc(n)+(inv?' <span class="badge">Invoiced</span>':'')+'</h3><b>'+money(t.a)+' · '+hm(t.m)+'</b></div><div class="inv"><button class="mark" type="button" data-act="inv:'+esc(n)+'">'+(inv?'Undo invoiced':'Mark as invoiced')+'</button></div><div class="scroll"><table><thead><tr><th>Date</th><th>Work completed</th><th class="n">Time</th><th class="n">Rate</th><th class="n">Charge</th></tr></thead><tbody>'+es.map(function(e){return '<tr><td>'+fdate(e.d)+'</td><td>'+esc(e.w)+'</td><td class="n">'+hm(e.m)+'</td><td class="n">'+money(e.r)+'/h</td><td class="n">'+money(charge(e.m,e.r))+'</td></tr>'}).join("")+'</tbody></table></div></div>';
+ }).join("");
+ $("mAll").innerHTML=keys.map(function(k){
+  var t=tot(by[k]),o=0;
+  by[k].forEach(function(e){if(!S.invoiced[k+"|"+e.c])o+=charge(e.m,e.r)});
+  return '<tr><td>'+mname(k)+'</td><td class="n">'+by[k].length+'</td><td class="n">'+hm(t.m)+'</td><td class="n"><b>'+money(t.a)+'</b></td><td>'+(o>0?money(o)+' to invoice':'All invoiced')+'</td><td class="n"><button class="view" type="button" data-act="view:'+k+'">View</button></td></tr>';
+ }).join("");
+}
+
+function sure(key,label,cls){return '<button type="button" class="'+cls+(pending===key?' sure':'')+'" data-sure data-act="'+esc(key)+'">'+(pending===key?'Sure? Click again':label)+'</button>'}
+function renderClients(){
+ var ns=names();
+ $("cBody").innerHTML=ns.length?ns.map(function(n){
+  var l=S.entries.filter(function(e){return e.c===n}),t=tot(l);
+  return '<tr><td>'+esc(n)+badge(S.clients[n].s)+'</td><td class="n"><input class="rin" type="number" min="0" step="0.01" value="'+S.clients[n].rate.toFixed(2)+'" data-rate="'+esc(n)+'" aria-label="Hourly rate for '+esc(n)+'"></td><td class="n">'+l.length+'</td><td class="n">'+hm(t.m)+'</td><td class="n">'+money(t.a)+'</td><td class="n">'+sure("delc:"+n,"Delete client","del")+'</td></tr>';
+ }).join(""):'<tr><td colspan="6" class="empty">No clients yet. Add your first client above.</td></tr>';
+ var n=S.entries.filter(function(e){return e.s}).length,has=n>0||ns.some(function(c){return S.clients[c].s});
+ $("sampleNote").textContent=has?"Sample clients and entries are marked Sample so you can practise safely. Delete them when you want to start with only your real work. This removes "+n+" sample "+(n===1?"entry":"entries")+" and leaves anything you added yourself.":"No sample data is showing. Restore it any time to practise with example clients and entries.";
+ $("sampleBtns").innerHTML=(has?sure("sdel","Delete sample data","ghost"):"")+'<button type="button" class="ghost" data-act="sadd">Restore sample data</button>';
+}
+function render(){
+ renderLog();renderMonth();renderClients();
+ var has=S.entries.some(function(e){return e.s})||names().some(function(c){return S.clients[c].s});
+ $("topNote").textContent=has?"Sample data is included for reference and marked Sample. You can delete it on the Clients tab.":"Track the work you do for each client and what to invoice.";
+ $("saveNote").textContent=canSave?"Your entries are saved automatically in this browser on this device.":"Saving isn’t available in this browser, so entries will be lost when you close the page.";
+}
+function showTab(t){
+ ["log","month","clients"].forEach(function(x){$("tab-"+x).hidden=(x!==t);$("tb-"+x).classList.toggle("on",x===t)});
+}
+function act(k){
+ var i=k.indexOf(":"),t=i<0?k:k.slice(0,i),a=i<0?"":k.slice(i+1);
+ if(t==="tab"){showTab(a);return}
+ if(t==="view"){curMonth=a;renderMonth();window.scrollTo(0,0);return}
+ if(t==="del"){S.entries=S.entries.filter(function(e){return e.id!==+a})}
+ else if(t==="delc"){delete S.clients[a];S.entries=S.entries.filter(function(e){return e.c!==a})}
+ else if(t==="inv"){var key=curMonth+"|"+a;if(S.invoiced[key])delete S.invoiced[key];else S.invoiced[key]=true}
+ else if(t==="sdel"){delSample()}
+ else if(t==="sadd"){addSample()}
+ commit();
+}
+document.addEventListener("click",function(ev){
+ var b=ev.target.closest?ev.target.closest("[data-act]"):null;
+ if(!b){if(pending){pending=null;renderClients()}return}
+ var k=b.getAttribute("data-act");
+ if(b.hasAttribute("data-sure")&&pending!==k){pending=k;renderClients();return}
+ pending=null;act(k);
+});
+$("monthSel").addEventListener("change",function(){curMonth=$("monthSel").value;renderMonth()});
+$("cBody").addEventListener("change",function(ev){
+ var n=ev.target.getAttribute&&ev.target.getAttribute("data-rate");
+ if(n===null||n===undefined||!S.clients[n])return;
+ var v=parseFloat(ev.target.value);
+ if(!isNaN(v)&&v>=0){S.clients[n].rate=v;commit()}else renderClients();
+});
+
+var fClient=$("client"),fDate=$("date"),fDesc=$("desc"),fH=$("hrs"),fM=$("mins"),fRate=$("rate"),fErr=$("err");
+function totalMins(){return (parseInt(fH.value,10)||0)*60+(parseInt(fM.value,10)||0)}
+function upPrev(){$("preview").textContent=money(charge(totalMins(),parseFloat(fRate.value)||0))}
+[fH,fM,fRate].forEach(function(i){i.addEventListener("input",upPrev)});
+fClient.addEventListener("change",function(){var n=find(fClient.value);if(n){fClient.value=n;fRate.value=S.clients[n].rate.toFixed(2);upPrev()}});
+$("form").addEventListener("submit",function(ev){
+ ev.preventDefault();
+ var m=totalMins(),r=parseFloat(fRate.value),typed=fClient.value.trim();
+ if(!typed){fErr.textContent="Please enter a client name.";return}
+ if(m<=0){fErr.textContent="Please enter the time spent (at least 1 minute).";return}
+ if(isNaN(r)||r<0){fErr.textContent="Please enter an hourly rate, for example 35.00.";return}
+ var n=find(typed);
+ if(!n){n=typed;S.clients[n]={rate:r,s:false}}
+ S.entries.push({id:S.nextId++,c:n,d:fDate.value,w:fDesc.value.trim(),m:m,r:r,s:false});
+ delete S.invoiced[fDate.value.slice(0,7)+"|"+n];
+ fErr.textContent="";fDesc.value="";fH.value=0;fM.value=0;upPrev();commit();fDesc.focus();
+});
+$("cform").addEventListener("submit",function(ev){
+ ev.preventDefault();
+ var e=$("cerr"),n=$("cname").value.trim(),r=parseFloat($("crate").value);
+ e.className="err";
+ if(!n){e.textContent="Please enter a client name.";return}
+ if(find(n)){e.textContent="That client is already in your list.";return}
+ if(isNaN(r)||r<0){e.textContent="Please enter an hourly rate, for example 35.00.";return}
+ S.clients[n]={rate:r,s:false};
+ $("cname").value="";$("crate").value="";commit();
+ e.className="err ok";e.textContent=n+" added. You can now log work for them.";
+});
+fDate.value=new Date().toISOString().slice(0,10);
+load();save();render();
+</script>
+</body>
+</html>
